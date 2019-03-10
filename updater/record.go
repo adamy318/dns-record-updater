@@ -2,6 +2,7 @@ package updater
 
 import (
 	"bufio"
+	"bytes"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -25,7 +26,9 @@ type DNSRecord struct {
 }
 
 var (
-	home = os.Getenv("HOME")
+	home        = os.Getenv("HOME")
+	echo        = "/bin/echo"
+	dnsFilePath = "/etc/pihole/lan.list"
 )
 
 func getHostKey(host string) (ssh.PublicKey, error) {
@@ -108,6 +111,15 @@ func GetDNSRecord(ip net.IP, hostname, string, domain string) *DNSRecord {
 
 }
 
+/*
+func setEchoString(echo string, dnsFile string, record DNSRecord) string {
+
+}
+
+func verifyDNSFilePath(dnsFilePath string) bool {
+
+}
+*/
 func SSHConnect(config *ssh.ClientConfig, hostname DNSServer) {
 
 	client, err := ssh.Dial("tcp", hostname.Hostname+":22", config)
@@ -121,5 +133,17 @@ func SSHConnect(config *ssh.ClientConfig, hostname DNSServer) {
 		log.Fatal("Failed to create session: ", err)
 	}
 	defer session.Close()
+
+	// verify DNS file path
+	var b bytes.Buffer
+	session.Stdout = &b
+	if err := session.Run("if [ -e " + dnsFilePath + " ]; then echo \"exists\"; fi"); err != nil {
+		log.Fatal("Failed to run: ", err.Error())
+	}
+	if b.String() != "exists\n" {
+		log.Fatal("dns file does not exist at this location")
+	} else {
+		fmt.Println("inside")
+	}
 
 }
