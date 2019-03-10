@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
 	"os"
 	"path/filepath"
 	"strings"
@@ -17,7 +18,10 @@ type DNSServer struct {
 	Hostname string
 }
 
-type SSHConfig struct {
+type DNSRecord struct {
+	IPAddress net.IP
+	FQDN      string
+	Hostname  string
 }
 
 var (
@@ -76,6 +80,32 @@ func GetSSHConfig(user string) *ssh.ClientConfig {
 		},
 		HostKeyCallback: ssh.FixedHostKey(hostKey),
 	}
+}
+
+func GetDNSRecord(ip net.IP, hostname, string, domain string) *DNSRecord {
+	reader := bufio.NewReader(os.Stdin)
+
+	fmt.Print("Enter IP address: ")
+	ipString, err := reader.ReadString('\n')
+	if err != nil {
+		log.Fatalf("%v", err)
+	}
+	if len(strings.Split(ipString, ".")) != 4 {
+		log.Fatal("did not enter valid IP address")
+	}
+	ip = net.ParseIP(ipString)
+
+	fmt.Print("Enter hostname: ")
+	hostname, err = reader.ReadString('\n')
+	if err != nil {
+		log.Fatalf("%v", err)
+	}
+	if len(strings.Fields(hostname)) > 1 {
+		log.Fatal("did not enter valid hostname")
+	}
+
+	return &DNSRecord{ip, hostname + "." + domain, hostname}
+
 }
 
 func SSHConnect(config *ssh.ClientConfig, hostname DNSServer) {
