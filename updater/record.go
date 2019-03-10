@@ -27,6 +27,7 @@ type DNSRecord struct {
 
 var (
 	home        = os.Getenv("HOME")
+	domain      = os.Getenv("HOME_DOMAIN")
 	echo        = "/bin/echo"
 	dnsFilePath = "/etc/pihole/lan.list"
 )
@@ -117,15 +118,6 @@ func GetDNSRecord(domain string) *DNSRecord {
 
 }
 
-/*
-func setEchoString(echo string, dnsFile string, record DNSRecord) string {
-
-}
-
-func verifyDNSFilePath(dnsFilePath string) bool {
-
-}
-*/
 func SSHConnect(config *ssh.ClientConfig, hostname DNSServer) {
 
 	client, err := ssh.Dial("tcp", hostname.Hostname+":22", config)
@@ -140,7 +132,7 @@ func SSHConnect(config *ssh.ClientConfig, hostname DNSServer) {
 	}
 	defer session.Close()
 
-	record := GetDNSRecord("ubardomain.lan")
+	record := GetDNSRecord(domain)
 	fmt.Println(record)
 
 	// verify DNS file path
