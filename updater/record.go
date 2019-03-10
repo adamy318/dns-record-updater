@@ -85,7 +85,7 @@ func GetSSHConfig(user string) *ssh.ClientConfig {
 	}
 }
 
-func GetDNSRecord(ip net.IP, hostname, string, domain string) *DNSRecord {
+func GetDNSRecord(domain string) *DNSRecord {
 	reader := bufio.NewReader(os.Stdin)
 
 	fmt.Print("Enter IP address: ")
@@ -96,16 +96,22 @@ func GetDNSRecord(ip net.IP, hostname, string, domain string) *DNSRecord {
 	if len(strings.Split(ipString, ".")) != 4 {
 		log.Fatal("did not enter valid IP address")
 	}
-	ip = net.ParseIP(ipString)
+
+	// cuts off trailing newline
+	ipString = strings.TrimSpace(ipString)
+	ip := net.ParseIP(ipString)
 
 	fmt.Print("Enter hostname: ")
-	hostname, err = reader.ReadString('\n')
+	hostname, err := reader.ReadString('\n')
 	if err != nil {
 		log.Fatalf("%v", err)
 	}
 	if len(strings.Fields(hostname)) > 1 {
 		log.Fatal("did not enter valid hostname")
 	}
+
+	// cuts off trailing newline
+	hostname = strings.TrimSpace(hostname)
 
 	return &DNSRecord{ip, hostname + "." + domain, hostname}
 
@@ -133,6 +139,9 @@ func SSHConnect(config *ssh.ClientConfig, hostname DNSServer) {
 		log.Fatal("Failed to create session: ", err)
 	}
 	defer session.Close()
+
+	record := GetDNSRecord("ubardomain.lan")
+	fmt.Println(record)
 
 	// verify DNS file path
 	var b bytes.Buffer
