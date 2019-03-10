@@ -114,6 +114,12 @@ func SSHConnect(config *ssh.ClientConfig, hostname DNSServer) {
 	if err != nil {
 		log.Fatalf("unable to connect to server: %v", err)
 	}
-	fmt.Println("we are inside boys")
 	defer client.Close()
+
+	session, err := client.NewSession()
+	if err != nil {
+		log.Fatal("Failed to create session: ", err)
+	}
+	defer session.Close()
+
 }

@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/adamy318/dns-record-updater/updater"
 )
 
@@ -13,6 +11,5 @@ func main() {
 	}
 
 	updater.SSHConnect(updater.GetSSHConfig(user), *server)
-	fmt.Println("yes")
 
 }
